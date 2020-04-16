@@ -154,14 +154,14 @@ public class CloudUtils {
         JsonArray rootObjects = rootElement.getAsJsonArray();
         if(rootObjects.size() > 0) {
             for (JsonElement rootObject : rootObjects) {
-                var about = rootObject.getAsJsonObject().getAsJsonPrimitive("about").getAsString();
-                var owner = rootObject.getAsJsonObject().getAsJsonPrimitive("owner").getAsString();
-                var dueDateJson = rootObject.getAsJsonObject().getAsJsonPrimitive("due_date").getAsString();
-                var createdDateJson = rootObject.getAsJsonObject().getAsJsonPrimitive("created_date").getAsString();
-                var status = rootObject.getAsJsonObject().getAsJsonPrimitive("status").getAsString();
-                var category = rootObject.getAsJsonObject().getAsJsonPrimitive("category").getAsString();
-                var idNumber = rootObject.getAsJsonObject().getAsJsonPrimitive("id").getAsString();
-                list.add(new ToDoItem(about, owner, makeTSfromJsonString(dueDateJson), makeTSfromJsonString(createdDateJson), status, category, idNumber));
+                var about = getStringFieldFromObject(rootObject,"about");
+                var owner = getStringFieldFromObject(rootObject,"owner");
+                var dueDateJson = getStringFieldFromObject(rootObject,"due_date");
+                var createdDateJson = getStringFieldFromObject(rootObject,"created_date");
+                var status = getStringFieldFromObject(rootObject,"status");
+                var category = getStringFieldFromObject(rootObject,"category");
+                var idNumber = getStringFieldFromObject(rootObject,"id");
+                list.add(new ToDoItem(about, owner, new TimeStamp(dueDateJson), new TimeStamp(createdDateJson), status, category, idNumber));
             }
         } else {
             return null;
@@ -169,17 +169,12 @@ public class CloudUtils {
         return list;
     }
 
-    public TimeStamp makeTSfromJsonString(String jsonString){
-        if (thisIsNotAJSONString(jsonString)) {
-            return null;
+    public String getStringFieldFromObject(JsonElement rootObject,String fieldName){
+        try{
+            return rootObject.getAsJsonObject().getAsJsonPrimitive(fieldName).getAsString();
+        } catch (NullPointerException e){
+            return "n/a";
         }
-        JsonParser jsonParser = new JsonParser();
-        JsonElement rootElement = jsonParser.parse(jsonString);
-        JsonObject rootObject = rootElement.getAsJsonObject();
-        var year = rootObject.getAsJsonPrimitive("year").getAsInt();
-        var month = rootObject.getAsJsonPrimitive("month").getAsInt();
-        var day = rootObject.getAsJsonPrimitive("day").getAsInt();
-        return new TimeStamp(year, month, day);
     }
 
     private boolean thisIsNotAJSONString(String json){
